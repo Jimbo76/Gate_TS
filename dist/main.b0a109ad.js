@@ -393,7 +393,130 @@ function (_super) {
 }(Phaser.Scene);
 
 exports.MenuScene = MenuScene;
-},{"../CST":"src/CST.ts"}],"src/scenes/PlayScene.ts":[function(require,module,exports) {
+},{"../CST":"src/CST.ts"}],"src/Sprite.ts":[function(require,module,exports) {
+"use strict";
+
+var __extends = this && this.__extends || function () {
+  var _extendStatics = function extendStatics(d, b) {
+    _extendStatics = Object.setPrototypeOf || {
+      __proto__: []
+    } instanceof Array && function (d, b) {
+      d.__proto__ = b;
+    } || function (d, b) {
+      for (var p in b) {
+        if (b.hasOwnProperty(p)) d[p] = b[p];
+      }
+    };
+
+    return _extendStatics(d, b);
+  };
+
+  return function (d, b) {
+    _extendStatics(d, b);
+
+    function __() {
+      this.constructor = d;
+    }
+
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+  };
+}();
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var Sprite =
+/** @class */
+function (_super) {
+  __extends(Sprite, _super);
+  /**
+   *
+   */
+
+
+  function Sprite(scene, x, y, texture, frame) {
+    var _this = _super.call(this, scene, x, y, texture, frame) || this;
+
+    scene.sys.updateList.add(_this);
+    scene.sys.displayList.add(_this);
+
+    _this.setScale(2);
+
+    _this.setOrigin(0, 0);
+
+    return _this;
+  }
+
+  return Sprite;
+}(Phaser.GameObjects.Sprite);
+
+exports.Sprite = Sprite;
+},{}],"src/CharacterSprite.ts":[function(require,module,exports) {
+"use strict";
+
+var __extends = this && this.__extends || function () {
+  var _extendStatics = function extendStatics(d, b) {
+    _extendStatics = Object.setPrototypeOf || {
+      __proto__: []
+    } instanceof Array && function (d, b) {
+      d.__proto__ = b;
+    } || function (d, b) {
+      for (var p in b) {
+        if (b.hasOwnProperty(p)) d[p] = b[p];
+      }
+    };
+
+    return _extendStatics(d, b);
+  };
+
+  return function (d, b) {
+    _extendStatics(d, b);
+
+    function __() {
+      this.constructor = d;
+    }
+
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+  };
+}();
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var CharacterSprite =
+/** @class */
+function (_super) {
+  __extends(CharacterSprite, _super);
+  /**
+   *
+   */
+
+
+  function CharacterSprite(scene, x, y, texture, frame) {
+    var _this = _super.call(this, scene, x, y, texture, frame) || this;
+
+    scene.sys.updateList.add(_this);
+    scene.sys.displayList.add(_this);
+
+    _this.setScale(2);
+
+    _this.setOrigin(0, 0);
+
+    scene.physics.world.enableBody(_this);
+
+    _this.setImmovable(true);
+
+    _this.hp = 10;
+    return _this;
+  }
+
+  return CharacterSprite;
+}(Phaser.Physics.Arcade.Sprite);
+
+exports.CharacterSprite = CharacterSprite;
+},{}],"src/scenes/PlayScene.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -427,6 +550,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var CST_1 = require("../CST");
+
+var Sprite_1 = require("../Sprite");
+
+var CharacterSprite_1 = require("../CharacterSprite");
 
 var PlayScene =
 /** @class */
@@ -495,10 +622,13 @@ function (_super) {
   };
 
   PlayScene.prototype.create = function () {
-    var _this = this;
+    var _this = this; // debugger;
+    // let cat = this.add.sprite(100, 100, CST.SPRITES.CAT).setScale(2);
 
-    this.anna = this.physics.add.sprite(400, 400, "anna", 26).setScale(2);
-    this.hooded = this.physics.add.sprite(200, 200, "hooded", 26).setScale(2).setImmovable(true);
+
+    var cat = new Sprite_1.Sprite(this, 100, 100, CST_1.CST.SPRITES.CAT);
+    this.anna = new CharacterSprite_1.CharacterSprite(this, 400, 400, "anna", 26);
+    this.hooded = new CharacterSprite_1.CharacterSprite(this, 200, 200, "hooded", 26);
     this.fireAttacks = this.physics.add.group();
     this.assassins = this.physics.add.group({
       immovable: true
@@ -531,7 +661,12 @@ function (_super) {
       console.log(pointer.x + " and the y " + pointer.y);
     });
     this.physics.world.addCollider(this.anna, this.hooded, function (anna, hooded) {
-      anna.destroy();
+      anna.hp--;
+
+      if (anna.hp <= 0) {
+        anna.destroy();
+      }
+
       hooded.destroy();
       console.log("colliding");
     });
@@ -540,7 +675,7 @@ function (_super) {
       hooded.destroy();
 
       for (var i = 0; i < 2; i++) {
-        _this.assassins.add(_this.physics.add.sprite(200, 200, "hooded", 26).setScale(2).setImmovable(true));
+        _this.assassins.add(new CharacterSprite_1.CharacterSprite(_this, 200, 200, "hooded", 26));
       }
     });
   };
@@ -587,7 +722,7 @@ function (_super) {
 }(Phaser.Scene);
 
 exports.PlayScene = PlayScene;
-},{"../CST":"src/CST.ts"}],"src/main.ts":[function(require,module,exports) {
+},{"../CST":"src/CST.ts","../Sprite":"src/Sprite.ts","../CharacterSprite":"src/CharacterSprite.ts"}],"src/main.ts":[function(require,module,exports) {
 "use strict";
 /** @type {import("../typings/phaser")} */
 
@@ -615,7 +750,7 @@ var game = new Phaser.Game({
     }
   }
 });
-},{"./scenes/LoadScene":"src/scenes/LoadScene.ts","./scenes/MenuScene":"src/scenes/MenuScene.ts","./scenes/PlayScene":"src/scenes/PlayScene.ts"}],"../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./scenes/LoadScene":"src/scenes/LoadScene.ts","./scenes/MenuScene":"src/scenes/MenuScene.ts","./scenes/PlayScene":"src/scenes/PlayScene.ts"}],"../../../Users/james/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -643,7 +778,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60065" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59217" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -818,5 +953,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","src/main.ts"], null)
+},{}]},{},["../../../Users/james/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","src/main.ts"], null)
 //# sourceMappingURL=/main.b0a109ad.js.map
