@@ -618,7 +618,10 @@ function (_super) {
       frameWidth: 64,
       atlas: "characters",
       frame: "hooded"
-    }); // console.log(this.textures.list);
+    });
+    this.load.image("terrain", "./assets/image/terrain_atlas.png");
+    this.load.image("items", "./assets/image/items.png");
+    this.load.tilemapTiledJSON("mappy", "./assets/maps/mappy.json");
   };
 
   PlayScene.prototype.create = function () {
@@ -678,6 +681,32 @@ function (_super) {
         _this.assassins.add(new CharacterSprite_1.CharacterSprite(_this, 200, 200, "hooded", 26));
       }
     });
+    var mappy = this.add.tilemap("mappy");
+    var terrain = mappy.addTilesetImage("terrain_atlas", "terrain");
+    var items = mappy.addTilesetImage("items"); // Layers
+
+    var botLayer = mappy.createStaticLayer("bot", [terrain], 0, 0).setDepth(-1);
+    var topLayer = mappy.createDynamicLayer("top", [terrain], 0, 0); // Map Collisions
+
+    this.physics.add.collider(this.anna, topLayer); // By Tile Property
+
+    topLayer.setCollisionByProperty({
+      collides: true
+    }); // By Tile Indexes
+
+    topLayer.setCollision([269, 270, 271, 301, 302, 303, 333, 334, 335]); // Map Events
+    // By Location
+
+    topLayer.setTileLocationCallback(10, 8, 1, 1, function () {
+      alert("The Sword Calls to You!"); // Top prevent message from popping-up, need to call same function recursively
+      //@ts-ignore
+
+      topLayer.setTileLocationCallback(10, 8, 1, 1, null);
+    }); // By Index
+
+    topLayer.setTileIndexCallback([272, 273, 274, 304, 305, 306, 336, 337, 338], function () {
+      console.log("Stop Stepping in Lava");
+    }, this);
   };
 
   PlayScene.prototype.update = function (time, delta) {
@@ -778,7 +807,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59217" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50226" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
