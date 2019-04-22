@@ -78,8 +78,6 @@ export class PlayScene extends Phaser.Scene {
 
     create() {
         // debugger;
-        // let cat = this.add.sprite(100, 100, CST.SPRITES.CAT).setScale(2);
-        let cat = new Sprite(this, 100, 100, CST.SPRITES.CAT);
         this.anna = new CharacterSprite(this, 400, 400, "anna", 26);
         this.hooded = new CharacterSprite(this, 200, 200, "hooded", 26);
         this.fireAttacks = this.physics.add.group();
@@ -103,7 +101,7 @@ export class PlayScene extends Phaser.Scene {
         this.keyboard = this.input.keyboard.addKeys("W, A, S, D");
         this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
             if(pointer.isDown) {    // Is Clicking
-                let fire = this.add.sprite(pointer.x, pointer. y, "daze", "fire00.png").play("blaze");
+                let fire = this.add.sprite(pointer.worldX, pointer.worldY, "daze", "fire00.png").play("blaze");
                 this.fireAttacks.add(fire);
                 fire.on("animation.complete", () => {
                     fire.destroy();
@@ -163,6 +161,32 @@ export class PlayScene extends Phaser.Scene {
             topLayer.setTileIndexCallback([272,273,274,304,305,306,336,337,338], () => {
                 console.log("Stop Stepping in Lava");
             }, this);
+
+            // Interactive Items from Object Layer
+            let items = mappy.createFromObjects("pickup", 1114, { key: CST.SPRITES.CAT }).map((sprite: Phaser.GameObjects.Sprite) => {
+                sprite.setScale(2);
+                sprite.setInteractive();
+            })
+
+            this.input.on("gameobjectdown", (pointer: Phaser.Input.Pointer, obj: Phaser.GameObjects.Sprite) => {
+                obj.destroy();
+            })
+
+            this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+
+                // Pixel Position to Tile Position
+                let tile = mappy.getTileAt(mappy.worldToTileX(pointer.x), mappy.worldToTileY(pointer.y))
+
+                if(tile) {
+                    console.log(tile);
+                }
+            })
+
+            this.cameras.main.startFollow(this.anna);
+            this.physics.world.setBounds(0, 0, mappy.widthInPixels, mappy.heightInPixels);
+
+            // Show Layer Hit Boxes
+            // topLayer.renderDebug(this.add.graphics());
     }
 
     update(time: number, delta: number) {   // Delta 16.666 @ 60 fps

@@ -393,66 +393,7 @@ function (_super) {
 }(Phaser.Scene);
 
 exports.MenuScene = MenuScene;
-},{"../CST":"src/CST.ts"}],"src/Sprite.ts":[function(require,module,exports) {
-"use strict";
-
-var __extends = this && this.__extends || function () {
-  var _extendStatics = function extendStatics(d, b) {
-    _extendStatics = Object.setPrototypeOf || {
-      __proto__: []
-    } instanceof Array && function (d, b) {
-      d.__proto__ = b;
-    } || function (d, b) {
-      for (var p in b) {
-        if (b.hasOwnProperty(p)) d[p] = b[p];
-      }
-    };
-
-    return _extendStatics(d, b);
-  };
-
-  return function (d, b) {
-    _extendStatics(d, b);
-
-    function __() {
-      this.constructor = d;
-    }
-
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-  };
-}();
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var Sprite =
-/** @class */
-function (_super) {
-  __extends(Sprite, _super);
-  /**
-   *
-   */
-
-
-  function Sprite(scene, x, y, texture, frame) {
-    var _this = _super.call(this, scene, x, y, texture, frame) || this;
-
-    scene.sys.updateList.add(_this);
-    scene.sys.displayList.add(_this);
-
-    _this.setScale(2);
-
-    _this.setOrigin(0, 0);
-
-    return _this;
-  }
-
-  return Sprite;
-}(Phaser.GameObjects.Sprite);
-
-exports.Sprite = Sprite;
-},{}],"src/CharacterSprite.ts":[function(require,module,exports) {
+},{"../CST":"src/CST.ts"}],"src/CharacterSprite.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -497,14 +438,13 @@ function (_super) {
   function CharacterSprite(scene, x, y, texture, frame) {
     var _this = _super.call(this, scene, x, y, texture, frame) || this;
 
+    scene.physics.world.enableBody(_this);
     scene.sys.updateList.add(_this);
     scene.sys.displayList.add(_this);
 
     _this.setScale(2);
 
     _this.setOrigin(0, 0);
-
-    scene.physics.world.enableBody(_this);
 
     _this.setImmovable(true);
 
@@ -550,8 +490,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var CST_1 = require("../CST");
-
-var Sprite_1 = require("../Sprite");
 
 var CharacterSprite_1 = require("../CharacterSprite");
 
@@ -626,10 +564,8 @@ function (_super) {
 
   PlayScene.prototype.create = function () {
     var _this = this; // debugger;
-    // let cat = this.add.sprite(100, 100, CST.SPRITES.CAT).setScale(2);
 
 
-    var cat = new Sprite_1.Sprite(this, 100, 100, CST_1.CST.SPRITES.CAT);
     this.anna = new CharacterSprite_1.CharacterSprite(this, 400, 400, "anna", 26);
     this.hooded = new CharacterSprite_1.CharacterSprite(this, 200, 200, "hooded", 26);
     this.fireAttacks = this.physics.add.group();
@@ -652,7 +588,7 @@ function (_super) {
     this.input.on("pointermove", function (pointer) {
       if (pointer.isDown) {
         // Is Clicking
-        var fire_1 = _this.add.sprite(pointer.x, pointer.y, "daze", "fire00.png").play("blaze");
+        var fire_1 = _this.add.sprite(pointer.worldX, pointer.worldY, "daze", "fire00.png").play("blaze");
 
         _this.fireAttacks.add(fire_1);
 
@@ -706,7 +642,28 @@ function (_super) {
 
     topLayer.setTileIndexCallback([272, 273, 274, 304, 305, 306, 336, 337, 338], function () {
       console.log("Stop Stepping in Lava");
-    }, this);
+    }, this); // Interactive Items from Object Layer
+
+    var items = mappy.createFromObjects("pickup", 1114, {
+      key: CST_1.CST.SPRITES.CAT
+    }).map(function (sprite) {
+      sprite.setScale(2);
+      sprite.setInteractive();
+    });
+    this.input.on("gameobjectdown", function (pointer, obj) {
+      obj.destroy();
+    });
+    this.input.on("pointerdown", function (pointer) {
+      // Pixel Position to Tile Position
+      var tile = mappy.getTileAt(mappy.worldToTileX(pointer.x), mappy.worldToTileY(pointer.y));
+
+      if (tile) {
+        console.log(tile);
+      }
+    });
+    this.cameras.main.startFollow(this.anna);
+    this.physics.world.setBounds(0, 0, mappy.widthInPixels, mappy.heightInPixels); // Show Layer Hit Boxes
+    // topLayer.renderDebug(this.add.graphics());
   };
 
   PlayScene.prototype.update = function (time, delta) {
@@ -751,7 +708,7 @@ function (_super) {
 }(Phaser.Scene);
 
 exports.PlayScene = PlayScene;
-},{"../CST":"src/CST.ts","../Sprite":"src/Sprite.ts","../CharacterSprite":"src/CharacterSprite.ts"}],"src/main.ts":[function(require,module,exports) {
+},{"../CST":"src/CST.ts","../CharacterSprite":"src/CharacterSprite.ts"}],"src/main.ts":[function(require,module,exports) {
 "use strict";
 /** @type {import("../typings/phaser")} */
 
@@ -807,7 +764,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50226" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53457" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
