@@ -3,6 +3,7 @@ import { Sprite } from "../Sprite";
 import { CharacterSprite } from "../CharacterSprite";
 
 export class PlayScene extends Phaser.Scene {
+    player!: Phaser.GameObjects.Container;
     anna!: Phaser.Physics.Arcade.Sprite;
     hooded!: Phaser.Physics.Arcade.Sprite;
     assassins!: Phaser.Physics.Arcade.Group;
@@ -19,6 +20,29 @@ export class PlayScene extends Phaser.Scene {
     }
 
     preload() {
+
+        this.textures.addSpriteSheetFromAtlas("mandy", {frameHeight: 64, frameWidth: 64, atlas: "characters", frame: "mandy"});
+
+        this.anims.create({
+            key: "mandyswordleft",
+            frameRate: 5,
+            frames: this.anims.generateFrameNumbers("mandy", {
+                start: 169,
+                end: 174
+            })
+        });
+
+        this.anims.create({
+            key: "swordleft",
+            frameRate: 5,
+            frames: this.anims.generateFrameNumbers("rapier", {
+                start: 6,
+                end: 11
+            }),
+            showOnStart: true,
+            hideOnComplete: true
+        });
+
         this.anims.create({
             key: "left",
             frameRate: 10,
@@ -67,6 +91,7 @@ export class PlayScene extends Phaser.Scene {
             showOnStart: true,
             hideOnComplete: true
         });
+        
         this.textures.addSpriteSheetFromAtlas("hooded", {frameHeight: 64, frameWidth: 64, atlas: "characters", frame: "hooded"});
 
         this.load.image("terrain", "./assets/image/terrain_atlas.png");
@@ -78,6 +103,15 @@ export class PlayScene extends Phaser.Scene {
 
     create() {
         // debugger;
+        this.player = this.add.container(200, 200, [this.add.sprite(0, 0, "mandy", 26), this.add.sprite(0, 0, "rapier",).setVisible(false)])
+        .setDepth(1).setScale(2);
+
+        // Phaser 3.16 changes "keydown_F" to "keydown-F"
+        this.input.keyboard.on("keydown-F", () => {
+            (this.player.list[0] as Phaser.GameObjects.Sprite).play("mandyswordleft");
+            (this.player.list[1] as Phaser.GameObjects.Sprite).play("swordleft");
+        });
+
         this.anna = new CharacterSprite(this, 400, 400, "anna", 26);
         this.hooded = new CharacterSprite(this, 200, 200, "hooded", 26);
         this.fireAttacks = this.physics.add.group();
